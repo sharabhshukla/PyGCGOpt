@@ -64,12 +64,14 @@ cdef SCIP_RETCODE PyPricingSolverExitSol (GCG* gcg, GCG_SOLVER* solver) noexcept
 cdef SCIP_RETCODE PyPricingSolverUpdate (GCG* gcg, SCIP* pricingprob, GCG_SOLVER* solver, int probnr, SCIP_Bool varobjschanged, SCIP_Bool varbndschanged, SCIP_Bool consschanged) noexcept with gil:
     py_pricing_solver = get_py_pricing_solver(solver)
     py_pricingprob = GCGPricingModel.create(pricingprob)
+    (<GCGPricingModel>py_pricingprob)._gcg = gcg
     py_pricing_solver.updateSolver(py_pricingprob, probnr, varobjschanged, varbndschanged, consschanged)
     return SCIP_OKAY
 
 cdef SCIP_RETCODE PyPricingSolverSolve (GCG* gcg, SCIP* pricingprob, GCG_SOLVER* solver, int probnr, SCIP_Real dualsolconv, SCIP_Real* lowerbound, GCG_PRICINGSTATUS* status) noexcept with gil:
     py_pricing_solver = get_py_pricing_solver(solver)
     py_pricingprob = GCGPricingModel.create(pricingprob)
+    (<GCGPricingModel>py_pricingprob)._gcg = gcg
     result_dict = py_pricing_solver.solve(py_pricingprob, probnr, dualsolconv)
     lowerbound[0] = result_dict.get("lowerbound", 0)
     status[0] = result_dict.get("status", <GCG_PRICINGSTATUS>status[0])
@@ -78,6 +80,7 @@ cdef SCIP_RETCODE PyPricingSolverSolve (GCG* gcg, SCIP* pricingprob, GCG_SOLVER*
 cdef SCIP_RETCODE PyPricingSolverSolveHeur (GCG* gcg, SCIP* pricingprob, GCG_SOLVER* solver, int probnr, SCIP_Real dualsolconv, SCIP_Real* lowerbound, GCG_PRICINGSTATUS* status) noexcept with gil:
     py_pricing_solver = get_py_pricing_solver(solver)
     py_pricingprob = GCGPricingModel.create(pricingprob)
+    (<GCGPricingModel>py_pricingprob)._gcg = gcg
     result_dict = py_pricing_solver.solveHeuristic(py_pricingprob, probnr, dualsolconv)
     lowerbound[0] = result_dict.get("lowerbound", 0)
     status[0] = result_dict.get("status", <GCG_PRICINGSTATUS>status[0])

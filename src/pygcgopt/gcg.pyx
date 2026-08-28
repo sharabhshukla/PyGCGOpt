@@ -558,6 +558,8 @@ cdef class Model(SCIPModel):
 
 
 cdef class GCGPricingModel(SCIPModel):
+    cdef GCG* _gcg
+
     @staticmethod
     cdef create(SCIP* scip):
         """Creates a pricing problem model and appropriately assigns the scip and bestsol parameters
@@ -566,6 +568,7 @@ cdef class GCGPricingModel(SCIPModel):
             raise Warning("cannot create Model with SCIP* == NULL")
         model = GCGPricingModel(createscip=False)
         model._scip = scip
+        model._gcg = NULL
         model._bestSol = Solution.create(scip, SCIPgetBestSol(scip))
         return model
 
@@ -579,7 +582,7 @@ cdef class GCGPricingModel(SCIPModel):
         :param redcost: last known reduced cost
         """
         cdef GCG_COL * gcg_col
-        cdef GCG* gcg = GCGpricerGetGcg(self._scip)
+        cdef GCG* gcg = self._gcg
         nvars = len(variables)
         cdef SCIP_VAR ** c_vars = <SCIP_VAR**>malloc(nvars * sizeof(SCIP_VAR*))
         cdef SCIP_Real * c_vals = <SCIP_Real*>malloc(nvars * sizeof(SCIP_Real))
